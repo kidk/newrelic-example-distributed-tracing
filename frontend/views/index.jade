@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  h2="Submit new task"
+  form(action="/", method="POST")
+    input(type="text", name="action", value="This is so urgent!")#action
+    button()#add="Add todo"
+
+  h2="List"
+  ul#list
+
