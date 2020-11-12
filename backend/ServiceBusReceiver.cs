@@ -77,11 +77,31 @@ namespace ServiceBusMessaging
             // Give back context
             IAgent agent = NewRelic.Api.Agent.NewRelic.GetAgent();
             ITransaction currentTransaction = agent.CurrentTransaction;
-            currentTransaction.AcceptDistributedTracePayload(payload.newRelic.newrelic, NewRelic.Api.Agent.TransportType.Queue);
+            currentTransaction.AcceptDistributedTraceHeaders<NewRelicDistributedTracingPayload>(payload.newRelic, GetHeaderValue, NewRelic.Api.Agent.TransportType.Queue);
 
             // Send through data
             _processData.Process(payload.payload);
             await _queueClient.CompleteAsync(message.SystemProperties.LockToken);
+
+            // Define local function to extract New Relic header
+            IEnumerable<string> GetHeaderValue(
+                NewRelicDistributedTracingPayload carrier,
+                string key)
+            {
+                var headerValues = new List<string>();
+                switch(key.ToLower()) {
+                    case "traceparent":
+                        headerValues.Add(carrier.traceparent);
+                    break;
+                    case "tracestate":
+                        headerValues.Add(carrier.tracestate);
+                    break;
+                    case "newrelic":
+                        headerValues.Add(carrier.newrelic);
+                    break;
+                }
+                return headerValues;
+            }
         }
 
         private Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs)
