@@ -2,8 +2,9 @@
 
 ## How to run
 
-frontend: `cd frontend && ./build-run.sh [NEWRELIC_LICENSE_KEY] "[SERVICE_BUS_ENDPOINT]`
-backend: `cd frontend && ./build-run.sh [NEWRELIC_LICENSE_KEY] "[SERVICE_BUS_ENDPOINT]`
+frontend: `cd frontend && ./build-run.sh [NEWRELIC_LICENSE_KEY] "[SERVICE_BUS_ENDPOINT]"`
+
+backend: `cd frontend && ./build-run.sh [NEWRELIC_LICENSE_KEY] "[SERVICE_BUS_ENDPOINT]"`
 
 Where to find:
 * NEWRELIC_LICENSE_KEY: https://docs.newrelic.com/docs/accounts/accounts-billing/account-setup/new-relic-license-key
