@@ -74,15 +74,6 @@ namespace ServiceBusMessaging
         {
             var payload = JsonConvert.DeserializeObject<NewRelicPayload>(Encoding.UTF8.GetString(message.Body));
 
-            // Give back context
-            IAgent agent = NewRelic.Api.Agent.NewRelic.GetAgent();
-            ITransaction currentTransaction = agent.CurrentTransaction;
-            currentTransaction.AcceptDistributedTraceHeaders<NewRelicDistributedTracingPayload>(payload.newRelic, GetHeaderValue, NewRelic.Api.Agent.TransportType.Queue);
-
-            // Send through data
-            _processData.Process(payload.payload);
-            await _queueClient.CompleteAsync(message.SystemProperties.LockToken);
-
             // Define local function to extract New Relic header
             IEnumerable<string> GetHeaderValue(
                 NewRelicDistributedTracingPayload carrier,
@@ -102,6 +93,15 @@ namespace ServiceBusMessaging
                 }
                 return headerValues;
             }
+
+            // Give back context
+            IAgent agent = NewRelic.Api.Agent.NewRelic.GetAgent();
+            ITransaction currentTransaction = agent.CurrentTransaction;
+            currentTransaction.AcceptDistributedTraceHeaders<NewRelicDistributedTracingPayload>(payload.newRelic, GetHeaderValue, NewRelic.Api.Agent.TransportType.Queue);
+
+            // Send through data
+            _processData.Process(payload.payload);
+            await _queueClient.CompleteAsync(message.SystemProperties.LockToken);
         }
 
         private Task ExceptionReceivedHandler(ExceptionReceivedEventArgs exceptionReceivedEventArgs)

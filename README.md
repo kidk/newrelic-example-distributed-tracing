@@ -34,9 +34,29 @@ https://github.com/kidk/newrelic-example-distributed-tracing/blob/main/backend/S
 ```
 var payload = JsonConvert.DeserializeObject<NewRelicPayload>(Encoding.UTF8.GetString(message.Body));
 
+// Define local function to extract New Relic header
+IEnumerable<string> GetHeaderValue(
+    NewRelicDistributedTracingPayload carrier,
+    string key)
+{
+    var headerValues = new List<string>();
+    switch(key.ToLower()) {
+        case "traceparent":
+            headerValues.Add(carrier.traceparent);
+        break;
+        case "tracestate":
+            headerValues.Add(carrier.tracestate);
+        break;
+        case "newrelic":
+            headerValues.Add(carrier.newrelic);
+        break;
+    }
+    return headerValues;
+}
+
 // Give back context
 IAgent agent = NewRelic.Api.Agent.NewRelic.GetAgent();
 ITransaction currentTransaction = agent.CurrentTransaction;
-currentTransaction.AcceptDistributedTracePayload(payload.newRelic.newrelic, NewRelic.Api.Agent.TransportType.Queue);
+currentTransaction.AcceptDistributedTraceHeaders<NewRelicDistributedTracingPayload>(payload.newRelic, GetHeaderValue, NewRelic.Api.Agent.TransportType.Queue);
 
 ```
